@@ -25,7 +25,7 @@ const getOutcome = (aliceFingers, bobFingers, aliceGuess, bobGuess) => {
 
 const Player = {
     ...hasRandom,
-    getFingers: Fun([], UInt),
+    getFingersAndGuess: Fun([], [UInt,UInt]),
     getGuess: Fun([UInt], UInt),
     seeOutcome: Fun([UInt], Null),
     notifyTimeout: Fun([], Null),
@@ -65,8 +65,7 @@ export const main = Reach.App(() => {
         commit();
 
         Alice.only(() => {
-            const _aliceFingers = interact.getFingers();
-            const _aliceGuess = interact.getGuess(_aliceFingers);
+            const [ _aliceFingers, _aliceGuess ] = interact.getFingersAndGuess();
 
             const [ _commitA, _saltA ] = makeCommitment(interact, _aliceFingers);
             const commitA = declassify(_commitA);
