@@ -25,8 +25,7 @@ const getOutcome = (aliceFingers, bobFingers, aliceGuess, bobGuess) => {
 
 const Player = {
     ...hasRandom,
-    getFingersAndGuess: Fun([], [UInt,UInt]),
-    getGuess: Fun([UInt], UInt),
+    getFingersAndGuess: Fun([], Tuple(UInt, UInt)),
     seeOutcome: Fun([UInt], Null),
     notifyTimeout: Fun([], Null),
 }
@@ -77,8 +76,7 @@ export const main = Reach.App(() => {
         commit();
 
         Bob.only(() => {
-            const bobFingers = declassify(interact.getFingers());
-            const bobGuess = declassify(interact.getGuess(bobFingers));
+            const [ bobFingers, bobGuess ] = declassify(interact.getFingersAndGuess());
         });
         Bob.publish(bobFingers, bobGuess).timeout(relativeTime(deadline), () => closeTo(Alice,notifyTimeout));
         commit();
