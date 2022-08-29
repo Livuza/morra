@@ -4,21 +4,21 @@ import { ask, yesno, done } from '@reach-sh/stdlib/ask.mjs';
 const stdlib = loadStdlib(process.env);
 
 const fmt = (x) => stdlib.formatCurrency(x, 4);
-const getBalance = async (who) => fmt(await stdlib.balanceOf(who));
+const getBalance = async (who) => fmt(await stdib.balanceOf(who));
 
 (async () => {
   const startingBalance = stdlib.parseCurrency(100);
 
-  const accAlice = await stdlib.newTestAccount(startingBalance);
-  const accBob = await stdlib.newTestAccount(startingBalance);
+  const accCharles = await stdlib.newTestAccount(startingBalance);
+  const accCollins = await stdlib.newTestAccount(startingBalance);
 
-  const beforeAlice = await getBalance(accAlice);
-  console.log(`Alice Starting Balance: ${beforeAlice}`);
-  const beforeBob = await getBalance(accBob);
-  console.log(`Bob Starting Balance: ${beforeBob}`);
+  const beforeCharles = await getBalance(accCharles);
+  console.log(`Charles Starting Balance: ${beforeCharles}`);
+  const beforeCollins = await getBalance(accCollins);
+  console.log(`Collins Starting Balance: ${beforeCollins}`);
 
-  const ctcAlice = accAlice.contract(backend);
-  const ctcBob = accBob.contract(backend, ctcAlice.getInfo());
+  const ctcCharles = accCharles.contract(backend);
+  const ctcCollins = accCollins.contract(backend, ctcCharles.getInfo());
 
   const Player = (who) => ({
     ...stdlib.hasRandom,
@@ -38,18 +38,18 @@ const getBalance = async (who) => fmt(await stdlib.balanceOf(who));
                 console.log(`${who} see Tie`);
                 break;
             case 1:
-                console.log(`${who} sees Alice Wins`);
+                console.log(`${who} sees Charles Wins`);
                 break;
             case 2:
-                console.log(`${who} sees Bob Wins`);
+                console.log(`${who} sees Collins Wins`);
                 break;
         }
     },
   });
 
   await Promise.all([
-    backend.Alice(ctcAlice, {
-      ...Player('Alice'),
+    backend.Charles(ctcCharles, {
+      ...Player('Charles'),
       setWager: async () => {
         const wager = await ask(
           `How much do you want to wager?`,
@@ -58,17 +58,17 @@ const getBalance = async (who) => fmt(await stdlib.balanceOf(who));
         return stdlib.parseCurrency(wager);
       },
     }),
-    backend.Bob(ctcBob, {
-      ...Player('Bob'),
+    backend.Collins(ctcCollins, {
+      ...Player('Collins'),
       acceptWager: (amt) => {      
-        console.log(`Bob accepts wager: ${fmt(amt)}`);
+        console.log(`Collins accepts wager: ${fmt(amt)}`);
       },
     }),
   ]);
-  const afterAlice = await getBalance(accAlice);
-  const afterBob = await getBalance(accBob);
+  const afterCharles = await getBalance(accCharles);
+  const afterCollins = await getBalance(accCollins);
 
-  console.log(`Alice ending balance: ${afterAlice}`);
-  console.log(`Bob ending balance: ${afterBob}`);
+  console.log(`Charles ending balance: ${afterCharles}`);
+  console.log(`Collins ending balance: ${afterCollins}`);
 
 })();

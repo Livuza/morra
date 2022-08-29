@@ -8,8 +8,9 @@ import * as backend from './build/index.main.mjs';
 import { loadStdlib } from '@reach-sh/stdlib';
 const stdlib = loadStdlib(process.env);
 
-const intToOutcome = ['Draw!', 'Alice wins!', 'Bob Wins!'];
+const intToOutcome = ['Collins Wins!', 'Draw!', 'Charles Wins!'];
 const {standardUnit} = stdlib;
+// const {standardUnit} = reach;
 const defaults = {defaultFundAmt: '10', defaultWager: '3', standardUnit};
 
 class App extends React.Component {
@@ -63,7 +64,7 @@ class Deployer extends Player {
     this.setState({view: 'Deploying', ctc});
     this.wager = stdlib.parseCurrency(this.state.wager); // UInt
     this.deadline = {ETH: 10, ALGO: 100, CFX: 1000}[stdlib.connector]; // UInt
-    backend.Alice(ctc, this);
+    backend.Charles(ctc, this);
     const ctcInfoStr = JSON.stringify(await ctc.getInfo(), null, 2);
     this.setState({view: 'WaitingForAttacher', ctcInfoStr});
   }
@@ -77,7 +78,7 @@ class Attacher extends Player {
   attach(ctcInfoStr) {
     const ctc = this.props.acc.contract(backend, JSON.parse(ctcInfoStr));
     this.setState({view: 'Attaching'});
-    backend.Bob(ctc, this);
+    backend.Collins(ctc, this);
   }
   async acceptWager(wagerAtomic) { // Fun([UInt], Null)
     const wager = stdlib.formatCurrency(wagerAtomic, 4);

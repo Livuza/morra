@@ -3,18 +3,18 @@
 
 const deadline = 30;
 
-// 0 = draw, 1 = alice, 2 = bob
-const getOutcome = (aliceFingers, bobFingers, aliceGuess, bobGuess) => {
-    if (aliceGuess == bobGuess) {
+//  0 = draw, 1 = charles, 2 = collins
+const getOutcome = (charlesFingers, collinsFingers, charlesGuess, collinsGuess) => {
+    if (charlesGuess == collinsGuess) {
         return 0;
     }
     else {
-        if ((aliceFingers + bobFingers) == aliceGuess) {
-            return 1; // alice wins
+        if ((charlesFingers + collinsFingers) == charlesGuess) {
+            return 1; // charles wins
         } 
         else {
-            if ((aliceFingers + bobFingers) == bobGuess) {
-                return 2; // bob wins
+            if ((charlesFingers + collinsFingers) == collinsGuess) {
+                return 2; // collins wins
             } 
             else {
                 return 0; // draw
@@ -31,75 +31,75 @@ const Player = {
 }
 
 export const main = Reach.App(() => {
-    const Alice = Participant('Alice', {
+    const Charles = Participant('Charles', {
         ...Player,
         setWager: Fun([], UInt),
     });
-    const Bob = Participant('Bob', {
+    const Collins = Participant('Collins', {
         ...Player,
         acceptWager: Fun([UInt], Null),
     });
     init();
 
     const notifyTimeout = () => {
-        each([Alice, Bob], () => {
+        each([Charles, Collins], () => {
           interact.notifyTimeout();
         });
     };
 
-    Alice.only(() => {
+    Charles.only(() => {
         const wagerAmt = declassify(interact.setWager());
     });
-    Alice.publish(wagerAmt).pay(wagerAmt);
+    Charles.publish(wagerAmt).pay(wagerAmt);
     commit();
 
-    Bob.only(() => {
+    Collins.only(() => {
         interact.acceptWager(wagerAmt);
     });
-    Bob.publish().pay(wagerAmt);
+    Collins.publish().pay(wagerAmt);
 
     var outcome = 0;
     invariant(balance() == 2 * wagerAmt);
     while(outcome == 0) {
         commit();
 
-        Alice.only(() => {
-            const [ _aliceFingers, _aliceGuess ] = interact.getFingersAndGuess();
+        Charles.only(() => {
+            const [ _charlesFingers, _charlesGuess ] = interact.getFingersAndGuess();
 
-            const [ _commitA, _saltA ] = makeCommitment(interact, _aliceFingers);
+            const [ _commitA, _saltA ] = makeCommitment(interact, _charlesFingers);
             const commitA = declassify(_commitA);
 
-            const [ _guessCommitA, _guessSaltA ] = makeCommitment(interact, _aliceGuess);
+            const [ _guessCommitA, _guessSaltA ] = makeCommitment(interact, _charlesGuess);
             const guessCommitA = declassify(_guessCommitA);
         });
-        Alice.publish(commitA, guessCommitA).timeout(relativeTime(deadline), () => closeTo(Bob,notifyTimeout));
+        Charles.publish(commitA, guessCommitA).timeout(relativeTime(deadline), () => closeTo(Collins,notifyTimeout));
         commit();
 
-        Bob.only(() => {
-            const [ bobFingers, bobGuess ] = declassify(interact.getFingersAndGuess());
+        Collins.only(() => {
+            const [ collinsFingers, collinsGuess ] = declassify(interact.getFingersAndGuess());
         });
-        Bob.publish(bobFingers, bobGuess).timeout(relativeTime(deadline), () => closeTo(Alice,notifyTimeout));
+        Collins.publish(collinsFingers, collinsGuess).timeout(relativeTime(deadline), () => closeTo(Charles,notifyTimeout));
         commit();
 
-        Alice.only(() => {
-            const [ saltA, aliceFingers ] = declassify([ _saltA, _aliceFingers ]);
-            const [ guessSaltA, aliceGuess ] = declassify([ _guessSaltA, _aliceGuess ]);
+        Charles.only(() => {
+            const [ saltA, charlesFingers ] = declassify([ _saltA, _charlesFingers ]);
+            const [ guessSaltA, charlesGuess ] = declassify([ _guessSaltA, _charlesGuess ]);
         });
-        Alice.publish(saltA, aliceFingers, guessSaltA, aliceGuess).timeout(relativeTime(deadline), () => closeTo(Bob,notifyTimeout));
-        checkCommitment(commitA, saltA, aliceFingers);
-        checkCommitment(guessCommitA, guessSaltA, aliceGuess);
+        Charles.publish(saltA, charlesFingers, guessSaltA, charlesGuess).timeout(relativeTime(deadline), () => closeTo(Collins,notifyTimeout));
+        checkCommitment(commitA, saltA, charlesFingers);
+        checkCommitment(guessCommitA, guessSaltA, charlesGuess);
         commit();
 
-        Alice.publish();
+        Charles.publish();
 
-        outcome = getOutcome(aliceFingers, bobFingers, aliceGuess, bobGuess);
+        outcome = getOutcome(charlesFingers, collinsFingers, charlesGuess, collinsGuess);
         continue;
     }
 
-    transfer(balance()).to(outcome == 1 ? Alice : Bob);
+    transfer(balance()).to(outcome == 1 ? Charles : Collins);
     commit();
 
-    each([Alice, Bob], () => {
+    each([Charles, Collins], () => {
         interact.seeOutcome(outcome);
     });
 
